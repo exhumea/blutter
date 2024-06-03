@@ -8,17 +8,27 @@ function onLibappLoaded() {
     Interceptor.attach(libapp.add(fn_addr), {
         onEnter: function () {
             init(this.context);
-            let objPtr = getArg(this.context, 0);
-            const [tptr, cls, values] = getTaggedObjectValue(objPtr);
-            console.log(`${cls.name}@${tptr.toString().slice(2)} =`, JSON.stringify(values, null, 2));
+            const instancePtr = getArg(this.context, 0);
+            dumpPtr(instancePtr, `${fn_addr}[instance] -> `);
         }
     });
+}
+
+function dumpPtr(ptr, logPrefix) {
+    try {
+        const [tptr, cls, values] = getTaggedObjectValue(ptr);
+        console.log(
+            `${logPrefix ?? ''}${cls.name}@${tptr.toString().slice(2)} =`, JSON.stringify(values, null, 2)
+        );
+    } catch (e) {
+        console.error(`${logPrefix ?? ''}not a valid pointer (e=${e})`);
+    }
 }
 
 function tryLoadLibapp() {
     libapp = Module.findBaseAddress('libapp.so');
     if (libapp === null)
-        setTimeout(tryLoadLibapp, 500);    
+        setTimeout(tryLoadLibapp, 500);
     else
         onLibappLoaded();
 }
@@ -33,12 +43,15 @@ const StackReg = 'x15';
 if (!PointerCompressedEnabled)
     console.error("now support only compressed pointer");
 
-let HeapAddress = 0;
+let HeapAddress = -1;
 // this function must be called at least on first interception of Dart function
 function init(context) {
-    if (HeapAddress === 0) {
-        // heap bit register value is not shifted
-        HeapAddress = context[HeapAddressReg].shl(32);
+    // heap bit register value is not shifted
+    const newHeapAddress = context[HeapAddressReg].shl(32);
+    if (HeapAddress === -1) {
+        HeapAddress = newHeapAddress;
+    } else if (HeapAddress !== newHeapAddress) {
+        console.error("inconsistent heap address")
     }
 }
 
@@ -73,7 +86,7 @@ function getDartArray(ptr, cls, depthLeft, glen = null) {
         }
         else {
             const key = `${ocls.name}@${tptr.toString().slice(2)}`;
-            vals.push({key: fieldValue});
+            vals.push({ key: fieldValue });
         }
     }
     return vals;
@@ -106,39 +119,39 @@ function isFieldNative(fieldBitmap, offset) {
 // return format: value
 function getObjectValue(ptr, cls, depthLeft = MaxDepth) {
     switch (cls.id) {
-    case CidObject:
-        console.error(`Object cid should not reach here`);
-        return;
-    case CidNull:
-        return null;
-    case CidBool:
-        return getDartBool(ptr, cls);
-    case CidString:
-        return getDartString(ptr, cls);
-    case CidMint:
-        return getDartMint(ptr, cls);
-    case CidDouble:
-        return getDartDouble(ptr, cls);
-    case CidArray:
-        return getDartArray(ptr, cls, depthLeft);
-    case CidGrowableArray:
-        return getDartGrowableArray(ptr, cls, depthLeft);
-    case CidUint8Array:
-        return getDartTypedArrayValues(ptr, cls, 1, (p) => p.readU8());
-    case CidInt8Array:
-        return getDartTypedArrayValues(ptr, cls, 1, (p) => p.readS8());
-    case CidUint16Array:
-        return getDartTypedArrayValues(ptr, cls, 2, (p) => p.readU16());
-    case CidInt16Array:
-        return getDartTypedArrayValues(ptr, cls, 2, (p) => p.readS16());
-    case CidUint32Array:
-        return getDartTypedArrayValues(ptr, cls, 4, (p) => p.readU32());
-    case CidInt32Array:
-        return getDartTypedArrayValues(ptr, cls, 4, (p) => p.readS32());
-    case CidUint64Array:
-        return getDartTypedArrayValues(ptr, cls, 8, (p) => p.readU64());
-    case CidInt64Array:
-        return getDartTypedArrayValues(ptr, cls, 8, (p) => p.readS64());
+        case CidObject:
+            console.error(`Object cid should not reach here`);
+            return;
+        case CidNull:
+            return null;
+        case CidBool:
+            return getDartBool(ptr, cls);
+        case CidString:
+            return getDartString(ptr, cls);
+        case CidMint:
+            return getDartMint(ptr, cls);
+        case CidDouble:
+            return getDartDouble(ptr, cls);
+        case CidArray:
+            return getDartArray(ptr, cls, depthLeft);
+        case CidGrowableArray:
+            return getDartGrowableArray(ptr, cls, depthLeft);
+        case CidUint8Array:
+            return getDartTypedArrayValues(ptr, cls, 1, (p) => p.readU8());
+        case CidInt8Array:
+            return getDartTypedArrayValues(ptr, cls, 1, (p) => p.readS8());
+        case CidUint16Array:
+            return getDartTypedArrayValues(ptr, cls, 2, (p) => p.readU16());
+        case CidInt16Array:
+            return getDartTypedArrayValues(ptr, cls, 2, (p) => p.readS16());
+        case CidUint32Array:
+            return getDartTypedArrayValues(ptr, cls, 4, (p) => p.readU32());
+        case CidInt32Array:
+            return getDartTypedArrayValues(ptr, cls, 4, (p) => p.readS32());
+        case CidUint64Array:
+            return getDartTypedArrayValues(ptr, cls, 8, (p) => p.readU64());
+        case CidInt64Array:
+            return getDartTypedArrayValues(ptr, cls, 8, (p) => p.readS64());
     }
 
     if (cls.id < NumPredefinedCids) {
@@ -146,7 +159,7 @@ function getObjectValue(ptr, cls, depthLeft = MaxDepth) {
         console.log(msg);
         return msg;
     }
-    
+
     if (depthLeft <= 0) {
         return 'no more recursive';
     }
@@ -182,7 +195,7 @@ function getInstanceValue(ptr, cls, scls, depthLeft = MaxDepth) {
         else if (isFieldNative(cls.fbitmap, offset)) {
             if (PointerCompressedEnabled && !isFieldNative(cls.fbitmap, offset + CompressedWordSize))
                 console.error("Native type but use only 4 bytes");
-            
+
             let val = ptr.add(offset).readU64();
             // TODO: this might not work on javascript because all number are floating pointer (except BigInt)
             // it is rare to find integer that larger than 0x1000_0000_0000_0000
