@@ -6,7 +6,7 @@
 #include <numeric>
 
 DartClass::DartClass(const DartLibrary& lib_, const dart::Class& cls) :
-	lib(lib_), unboxed_fields_bitmap(0), superCls(nullptr), ptr(cls.ptr()), declarationType(nullptr), type(CLASS), 
+	lib(lib_), unboxed_fields_bitmap(0), superCls(nullptr), ptr(cls.ptr()), declarationType(nullptr), type(CLASS),
 	num_type_arguments(0), num_type_parameters(0), mixin(nullptr), is_const_constructor(false), is_transformed_mixin(false)
 {
 	auto zone = dart::Thread::Current()->zone();
@@ -43,7 +43,7 @@ DartClass::DartClass(const DartLibrary& lib_, const dart::Class& cls) :
 	if (!dart::ClassTable::IsTopLevelCid(id)) {
 		//auto& supCls = dart::Class::Handle(zone, cls.SuperClass());
 		auto supClsPtr = cls.SuperClass();
-		
+
 		auto superCid = supClsPtr.untag()->id();
 		if (superCid > 0 && (intptr_t)supClsPtr == (intptr_t)dart::Object::null())
 			superCid = 0;
@@ -55,7 +55,7 @@ DartClass::DartClass(const DartLibrary& lib_, const dart::Class& cls) :
 		// from "vm/class_finalizer.cc":"markImplemented()"
 		// For a class used as an interface marks this class and all its superclasses implemented.
 		// Note: mixin is a interface too
-		// 
+		//
 		// the class is auto generated from user class with mixin(s)
 		// to find the real parent class (after "extends" keyword),
 		//   we have to follow up the parent class until class has no mixin
@@ -72,7 +72,7 @@ DartClass::DartClass(const DartLibrary& lib_, const dart::Class& cls) :
 
 		num_type_parameters = (uint32_t)cls.NumTypeParameters();
 		num_type_arguments = (uint32_t)cls.NumTypeArguments();
-		// parent class is needed to generete subvector type parameters of its parent, delay until superCls is set
+		// parent class is needed to generate subvector type parameters of its parent, delay until superCls is set
 	}
 	// interfaces reference to other types. wait until all classes are loaded
 
@@ -261,7 +261,7 @@ void DartClass::PrintHead(std::ostream& of)
 			of << " with " << mixin->FullName();
 		}
 	}
-	
+
 	of << " {\n";
 }
 

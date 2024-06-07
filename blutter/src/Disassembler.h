@@ -6,7 +6,7 @@
 #endif
 
 
-// master of disassmbled instructions from capstone
+// master of disassembled instructions from capstone
 // do not allow copy because this class must free the instructions
 class AsmInstructions {
 	cs_insn* insns;

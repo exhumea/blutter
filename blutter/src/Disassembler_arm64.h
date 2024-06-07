@@ -99,7 +99,7 @@ inline constexpr uint32_t GetCsRegSize(arm64_reg reg){
 		return 16;
 	if ((reg >= ARM64_REG_W0 && reg <= ARM64_REG_W30) || reg == ARM64_REG_WZR)
 		return 4;
-	// assume Xnn regsiter
+	// assume Xnn register
 	return 8;
 }
 

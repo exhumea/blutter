@@ -65,7 +65,7 @@ private:
 	std::unordered_map<uint64_t, DartField*> staticFields;
 	std::unique_ptr<DartTypeDb> typeDb;
 
-	// the dart Bulit-in type class id
+	// the dart Built-in type class id
 	intptr_t dartIntCid;
 	intptr_t dartDoubleCid;
 	intptr_t dartStringCid;

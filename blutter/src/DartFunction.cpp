@@ -149,7 +149,7 @@ void DartFunction::SetAnalyzedData(std::unique_ptr<AnalyzedFnData> data)
 {
 	// must never be called more than once
 	ASSERT(!analyzedData);
-	
+
 	analyzedData = std::move(data);
 }
 
@@ -242,7 +242,7 @@ void DartFunction::PrintHead(std::ostream& of) const
 		const auto& result_type = dart::AbstractType::Handle(sig.result_type());
 		result_type.PrintName(dart::Object::kScrubbedName, &buffer);
 		of << buffer.buffer() << " " << name;
-		// function type paramaters
+		// function type parameters
 		const auto& type_params = dart::TypeParameters::Handle(zone, sig.type_parameters());
 		if (!type_params.IsNull()) {
 			buffer.Clear();

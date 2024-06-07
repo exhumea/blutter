@@ -649,7 +649,7 @@ std::string DartDumper::ObjectToString(dart::Object& obj, bool simpleForm, bool 
 	ASSERT(obj.IsInstance());
 
 	if (cid < dart::kNumPredefinedCids) {
-		FATAL("Unhandle internal class %s (%ld)", app.GetClass(cid)->Name().c_str(), cid);
+		FATAL("Unhandled internal class %s (%ld)", app.GetClass(cid)->Name().c_str(), cid);
 	}
 
 	// TODO: print library and package prefix

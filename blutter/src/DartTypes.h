@@ -190,9 +190,9 @@ protected:
 	explicit DartFunctionType(bool nullable, bool hasImplicitParam, bool hasNamedParam, std::vector<DartTypeParameter*> typeParams)
 		: DartAbstractType(Kind::FunctionType, nullable), hasImplicitParam(hasImplicitParam), hasNamedParam(hasNamedParam), resultType(nullptr), typeParams(std::move(typeParams)) {}
 
-	bool hasImplicitParam; // this paramter for object method (so can be only 0 or 1)
+	bool hasImplicitParam; // this parameter for object method (so can be only 0 or 1)
 	// Function parameter cannot contain both optional positional parameters and optional named parameters
-	// if hasNamedParam is true, optionalParams are named pareters, else positional parameters
+	// if hasNamedParam is true, optionalParams are named parameters, else positional parameters
 	bool hasNamedParam;
 
 	std::vector<DartTypeParameter*> typeParams; // function type parameters in "<>"
@@ -229,7 +229,7 @@ protected:
 
 	std::unordered_map<intptr_t, DartAbstractType*> typesMap; // map dart ptr to the type
 	std::vector<std::vector<DartType*>> typesByCid;
-	
+
 	// Normally, type arguments are all read-only. no duplicated type arguments in Dart snapshot
 	// cache it here for quick lookup
 	std::unordered_map<intptr_t, DartTypeArguments*> typeArgsMap;

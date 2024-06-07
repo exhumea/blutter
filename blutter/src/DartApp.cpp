@@ -60,7 +60,7 @@ void DartApp::EnterScope()
 		// exit safepoint so new symbols can be created
 		//dart::Thread::Current()->SetAtSafepoint(false);
 		isolate->safepoint_handler()->ExitSafepointUsingLock(dart::Thread::Current());
-		
+
 		ppool = reinterpret_cast<dart::ObjectPool*>(dart::VMHandles::AllocateHandle(dart::Thread::Current()->zone()));
 		*ppool = isolate->group()->object_store()->global_object_pool();
 	}
@@ -193,7 +193,7 @@ void DartApp::loadFromClassTable(dart::IsolateGroup* ig)
 	//   But there are information about the methods owner and classes owner.
 	//   So, we can work backward to fill the libraries and classes information
 
-	// iterate from toplevel class table to genreate libraries
+	// iterate from toplevel class table to generate libraries
 	for (intptr_t i = 0; i < num_top_cids; i++) {
 		const auto topCid = dart::ClassTable::CidFromTopLevelIndex(i);
 		auto clsPtr = table->At(topCid);
@@ -314,7 +314,7 @@ void DartApp::loadStubs(dart::ObjectStore* store)
 	DO(build_generic_method_extractor_code, BuildGenericMethodExtractor);
 #endif
 #undef DO
-	
+
 	code = store->throw_stub();
 	throwStubAddr = code.EntryPoint();
 
@@ -476,7 +476,7 @@ void DartApp::findFunctionInHeap()
 #endif
 			}
 			if (stubs.contains(ep_offset))
-				throw std::runtime_error("duplitcate stub entry point");
+				throw std::runtime_error("duplicated stub entry point");
 			auto dartType = typeDb->FindOrAdd(dart::AbstractType::Cast(obj).ptr());
 			auto tstub = new DartTypeStub(code_ptr, ep_offset, code.Size(), *dartType, dartType->ToString());
 			stubs[ep_offset] = tstub;
@@ -503,7 +503,7 @@ void DartApp::findFunctionInHeap()
 		else {
 			auto msg = std::format("[!] unknown code at: {:#x}, {}\n", ep_offset, obj.ToCString());
 			std::cout << msg;
-			std::cout << "  !!! Unhandle case. Please report with your APK\n";
+			std::cout << "  !!! Unhandled case. Please report with your APK\n";
 			//throw std::runtime_error(msg);
 		}
 	}
@@ -534,7 +534,7 @@ void DartApp::finalizeFunctionsInfo()
 			}
 		}
 
-		// TODO: handle function result type and paramters type
+		// TODO: handle function result type and parameters type
 	}
 
 	std::unordered_map<uint64_t, DartFunction*> new_functions;
@@ -588,7 +588,7 @@ void DartApp::finalizeFunctionsInfo()
 		if (!sig.IsNull()) {
 			dartFn->Signature().returnType = TypeDb()->FindOrAdd(sig.result_type());
 
-			// function type paramaters
+			// function type parameters
 			const auto& type_params = dart::TypeParameters::Handle(sig.type_parameters());
 			if (!type_params.IsNull()) {
 				// TODO: function type parameters
